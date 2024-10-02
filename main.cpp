@@ -51,6 +51,42 @@ public:
         return;
     }
 
+    Node* findMin() {
+        return min_node;
+    }
+
+    Node* extract_min() {
+        if (!min_node) return nullptr;
+        Node* temp = min_node;
+        Node* ptr = temp;
+        Node* x = NULL;
+
+        if (temp->child) {
+
+            x = temp->child;
+            do {
+                ptr = x->right;
+                (min_node->left)->right = x;
+                x->right = min_node;
+                x->left = min_node->left;
+                min_node->left = x;
+                if (x->key <  min_node->key) min_node = x;
+                x->parent = NULL;
+                x = ptr;
+            } while (ptr != temp->child);
+        }
+        (temp->left)->right = temp->right;
+        (temp->right)->left = temp->left;
+        if (temp == temp->right && temp->child == NULL) {
+            min_node = NULL;
+        }
+        else {
+            min_node = temp->right;
+            //consolidate();
+        }
+        NodeCount--;
+        return temp;
+    }
 
 };
 
