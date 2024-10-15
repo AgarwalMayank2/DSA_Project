@@ -50,11 +50,36 @@ private:
                     x = y;
                     y = temp;
                 }
-                //link(y, x);
+                link(y, x);
                 degree_table[d] = nullptr;
                 d++;
             }
             degree_table[d] = x;
+        }
+
+        void link(Node* node_big, Node* node_small) {
+            //First we remove the node y(node_big) from its left and right
+            (node_big->left)->right = node_big->right;
+            (node_big->right)->left = node_big->left;
+
+            //Now we make node_small the parent of node1
+            node_big->parent = node_small;
+            node_big->left = node_big->right = node_big;
+
+            //Now we properly link node_big to node_small
+            if (!node_small->child) node_small = node_big;
+            else {
+                node_big->right = node_small->child;
+                node_big->left = (node_small->child)->left;
+                ((node_small->child)->left)->right = node_big;
+                (node_small->child)->left = node_big;
+            }
+
+            //Now we set the child of node_small according to the key values of node_big and child of node_small
+            if (node_big->key < node_small->child->key) node_small->child = node_big;
+
+            //We now increase the degree of node_small by 1
+            node_small->degree++;
         }
 
         //Making a new heap with the merged nodes that is the final step for consolidating the heap
