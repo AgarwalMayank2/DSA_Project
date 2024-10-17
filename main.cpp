@@ -96,6 +96,23 @@ private:
                 }
             }
         }
+
+        void decreaser(Node* node, int newval) {
+
+            if (!min_node) cout << "The Heap is Empty" << endl;
+            else if (!node) cout << "There is no such Node in the Heap" << endl;
+
+            node->key = newval;
+            temp = node->parent;
+
+            if (temp && node->key < temp->key) {
+                //Cut(node, temp);
+                //Cascade_cut(temp);
+            }
+            if (node->key < min_node->key) {
+                min_node = node;
+            }
+        }
     }
 
 public:
@@ -110,6 +127,7 @@ public:
     void insert(Node* node) { // We will use this function to insert a node in the heap
         if (!min_node) {
             min_node = node;
+            min_node->right = min_node->left = min_node;
         }
         else {
             (min_node->left)->right = node;
@@ -159,6 +177,25 @@ public:
         }
         NodeCount--;
         return temp;
+    }
+
+    void decrease(Node* node, int find, int newval) {
+        Node* found = NULL;
+        Node* temp = node;
+        node->mark = true;
+        Node* found_ptr = NULL;
+        if (temp->key == find) {
+            found_ptr = temp;
+            temp->mark = false;
+            found = found_ptr;
+            decreaser(found, val);
+        }
+        if (found_ptr == NULL) {
+            if (temp->child) decrease(temp->child, find, newval);
+            if (!(temp->right)->mark) decrease(temp->right, find, newval);
+        }
+        temp->mark = false;
+        found = found_ptr;
     }
 
 };
