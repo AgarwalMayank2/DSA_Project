@@ -13,7 +13,8 @@ public:
     Node* left; //left node pointer
     Node* right; //right node pointer
     int degree; //Degree of the node
-    bool mark;
+    bool mark; //This is useful while finding a particular node
+    bool cut; //This is for seeing if a child of a node has been cut or not
 
     Node(int key, string event) {
         key = key;
@@ -22,10 +23,11 @@ public:
         parent = child = nullptr;
         left = right = nullptr;
         mark = false;
+        cut = false;
     }
 };
 
-class FibonacciHeap() {
+class FibonacciHeap {
 private:
 
     void consolidate() { //Function that we are using for connecting the nodes which have same degrees
@@ -38,7 +40,7 @@ private:
         do{ //Pushing all the nodes to the nodes vector
             nodes.push_back(x);
             x = x->right;
-        } while(x != min_node)
+        } while(x != min_node);
 
         for (Node* w : nodes) {
             Node* x = w;
@@ -56,32 +58,6 @@ private:
             }
             degree_table[d] = x;
         }
-
-        void link(Node* node_big, Node* node_small) {
-            //First we remove the node y(node_big) from its left and right
-            (node_big->left)->right = node_big->right;
-            (node_big->right)->left = node_big->left;
-
-            //Now we make node_small the parent of node1
-            node_big->parent = node_small;
-            node_big->left = node_big->right = node_big;
-
-            //Now we properly link node_big to node_small
-            if (!node_small->child) node_small = node_big;
-            else {
-                node_big->right = node_small->child;
-                node_big->left = (node_small->child)->left;
-                ((node_small->child)->left)->right = node_big;
-                (node_small->child)->left = node_big;
-            }
-
-            //Now we set the child of node_small according to the key values of node_big and child of node_small
-            if (node_big->key < node_small->child->key) node_small->child = node_big;
-
-            //We now increase the degree of node_small by 1
-            node_small->degree++;
-        }
-
         //Making a new heap with the merged nodes that is the final step for consolidating the heap
         min_node = nullptr;
         for (auto& w : degree_table) {
@@ -96,21 +72,72 @@ private:
                 }
             }
         }
+    }
 
-        void decreaser(Node* node, int newval) {
+    void link(Node* node_big, Node* node_small) {
+        //First we remove the node y(node_big) from its left and right
+        (node_big->left)->right = node_big->right;
+        (node_big->right)->left = node_big->left;
 
-            if (!min_node) cout << "The Heap is Empty" << endl;
-            else if (!node) cout << "There is no such Node in the Heap" << endl;
+        //Now we make node_small the parent of node1
+        node_big->parent = node_small;
+        node_big->left = node_big->right = node_big;
 
-            node->key = newval;
-            temp = node->parent;
+        //Now we properly link node_big to node_small
+        if (!node_small->child) node_small = node_big;
+        else {
+            node_big->right = node_small->child;
+            node_big->left = (node_small->child)->left;
+            ((node_small->child)->left)->right = node_big;
+            (node_small->child)->left = node_big;
+        }
 
-            if (temp && node->key < temp->key) {
-                //Cut(node, temp);
-                //Cascade_cut(temp);
-            }
-            if (node->key < min_node->key) {
-                min_node = node;
+        //Now we set the child of node_small according to the key values of node_big and child of node_small
+        if (node_big->key < node_small->child->key) node_small->child = node_big;
+
+        //We now increase the degree of node_small by 1
+        node_small->degree++;
+    }
+
+    void decreaser(Node* node, int newval) {
+
+        if (!min_node) cout << "The Heap is Empty" << endl;
+        else if (!node) cout << "There is no such Node in the Heap" << endl;
+
+        node->key = newval;
+        Node* temp = node->parent;
+
+        if (temp && node->key < temp->key) {
+            Cut(node, temp);
+            Cascade_cut(temp);
+        }
+        if (node->key < min_node->key) {
+            min_node = node;
+        }
+    }
+
+    void Cut(Node* node, Node* temp) {
+        if (node == node->right) temp->child = nullptr;
+
+        if (node == temp->child) temp->child = node->right;
+
+        node->left->right = node->right;
+        node->right->left = node->left;
+
+        temp->degree--;
+        node->left = node->right = node;
+        node->parent = nullptr;
+        insert(node);
+    }
+
+    void Cascade_cut(Node* temp) {
+        Node* parent_node = temp->parent;
+
+        if (parent_node) {
+            if (!temp->cut) temp->cut = true;
+            else {
+                Cut(temp, parent_node);
+                Cascade_cut(parent_node);
             }
         }
     }
@@ -188,7 +215,7 @@ public:
             found_ptr = temp;
             temp->mark = false;
             found = found_ptr;
-            decreaser(found, val);
+            decreaser(found, newval);
         }
         if (found_ptr == NULL) {
             if (temp->child) decrease(temp->child, find, newval);
@@ -200,6 +227,69 @@ public:
 
 };
 
+class event {
+public:
+    int time;
+    string main_event;
+
+    event(int timestamp, string event_type) {
+        time = timestamp;
+        main_event = event_type;
+    }
+
+    void vehicle_arrives() {
+        cout << main_event << " will arrive at " << time <<  endl;
+    }
+
+    void traffic_lights_changer() {
+        cout << "Traffic lights will change to " << main_event << " at " << time << endl;
+    }
+};
+
+class vehicle_arrival : public event {
+public:
+    vehicle_arrival(int timestamp, string vehicle) : event(timestamp, vehicle) {}
+};
+
+class traffic_light : public event {
+public:
+    traffic_light(int timestamp, string light_change) : event(timestamp, light_change) {}
+};
+
+class Traffic_simulation{
+    Node* event_maker;
+
+public:
+};
+
+void event_choice() {
+    for (int i = 0; i<75; i++) {
+        cout << '-';
+    }
+    cout << endl;
+    cout << "Make a choice:-" << endl;
+    cout << "1. Make a event for vehicle arrival" << endl;
+    cout << "2. Make a event for traffic lights change" << endl;
+    cout << "3. Exit the simulation" << endl;
+    for (int i = 0; i<75; i++) {
+        cout << '-';
+    }
+    cout << endl;
+}
+
+void event_planner() {
+    cout << "Give your input :- ";
+    int main_choice;
+    cin >> main_choice;
+    if (main_choice == 1) {
+        
+    }
+}
+
 int main() {
+
+    int time;
+    event_choice();
+    event_planner();
 
 }
