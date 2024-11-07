@@ -1,5 +1,8 @@
 #include <iostream>
 #include <bits/stdc++.h>
+#include <thread>
+#include <chrono>
+#include <direct.h>
 using namespace std;
 
 //--------First we will do Fibonacci Heap implementation--------
@@ -16,9 +19,9 @@ public:
     bool mark; //This is useful while finding a particular node
     bool cut; //This is for seeing if a child of a node has been cut or not
 
-    Node(int key, string event) {
-        key = key;
-        event = event;
+    Node(int time, string event_type) {
+        key = time;
+        event = event_type;
         degree = 0;
         parent = child = nullptr;
         left = right = nullptr;
@@ -227,6 +230,13 @@ public:
 
 };
 
+FibonacciHeap pointer;
+
+void node_maker(int time, string event_name) {
+    Node* node = new Node(time, event_name);
+    pointer.insert(node);
+}
+
 class event {
 public:
     int time;
@@ -239,10 +249,14 @@ public:
 
     void vehicle_arrives() {
         cout << main_event << " will arrive at " << time <<  endl;
+        main_event = main_event+" arrives";
+        node_maker(time, main_event);
     }
 
     void traffic_lights_changer() {
         cout << "Traffic lights will change to " << main_event << " at " << time << endl;
+        main_event = "traffic lights to "+main_event;
+        node_maker(time, main_event);
     }
 };
 
@@ -262,6 +276,17 @@ class Traffic_simulation{
 public:
 };
 
+void min_taker(int time) {
+    if (pointer.min_node) {
+        Node* min = pointer.findMin();
+        if (min->key == time) {
+            cout << time << " : " << min->event << endl;
+            min = pointer.extract_min();
+        }
+    }
+    return;
+}
+
 void event_choice() {
     for (int i = 0; i<75; i++) {
         cout << '-';
@@ -270,26 +295,60 @@ void event_choice() {
     cout << "Make a choice:-" << endl;
     cout << "1. Make a event for vehicle arrival" << endl;
     cout << "2. Make a event for traffic lights change" << endl;
-    cout << "3. Exit the simulation" << endl;
+    cout << "3. Start the simulation" << endl;
+    cout << "4. Exit the simulation" << endl;
     for (int i = 0; i<75; i++) {
         cout << '-';
     }
     cout << endl;
 }
 
-void event_planner() {
+int event_planner() {
     cout << "Give your input :- ";
     int main_choice;
     cin >> main_choice;
     if (main_choice == 1) {
-        
+        cout << "Give the vehicle to come :- ";
+        string vehicle;
+        cin >> vehicle;
+        cout << "Give the timestamp at which " << vehicle << " will come :- ";
+        int time;
+        cin >> time;
+
+        vehicle_arrival veh(time, vehicle);
+        veh.vehicle_arrives();
     }
+    else if (main_choice == 2) {
+        cout << "Give the colour of the lights to change :- ";
+        string colour;
+        cin >> colour;
+        cout << "Give the timestamp at which traffic light will change :- ";
+        int time;
+        cin >> time;
+
+        traffic_light tr(time, colour);
+        tr.traffic_lights_changer();
+    }
+    else if (main_choice == 3) {
+        int time = 1;
+        while(true) {
+            cout << time << '\n';
+            min_taker(time);
+            //std::this_thread::sleep_for(std::chrono::seconds(1));
+            time++;
+            if (time == 100) break;
+        }
+    }
+    return main_choice;
 }
 
 int main() {
 
-    int time;
-    event_choice();
-    event_planner();
-
+    while(true) {
+        event_choice();
+        if (event_planner() == 4) {
+            cout << "Exiting Simulation";
+            return 0;
+        }
+    }
 }
