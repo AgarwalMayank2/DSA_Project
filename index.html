@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traffic Simulation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Traffic Simulation</h1>
+    <div class="controls">
+      <button id="addVehicle" class="btn">Add Vehicle</button>
+      <button id="addLight" class="btn">Add Traffic Light</button>
+      <button id="decreaseEvent" class="btn">Decrease Event Time</button>
+      <button id="startSimulation" class="btn">Start Simulation</button>
+      <button id="resetSimulation" class="btn">Reset Simulation</button>
+    </div>
+    <div class="simulation-log">
+      <h2>Simulation Log</h2>
+      <div class="time-display">Current Time: <span id="timeDisplay">0</span></div>
+      <ul id="eventLog"></ul>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

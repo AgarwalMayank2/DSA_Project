@@ -295,8 +295,9 @@ void event_choice() {
     cout << "Make a choice:-" << endl;
     cout << "1. Make a event for vehicle arrival" << endl;
     cout << "2. Make a event for traffic lights change" << endl;
-    cout << "3. Start the simulation" << endl;
-    cout << "4. Exit the simulation" << endl;
+    cout << "3. Decrease the time of an event" << endl;
+    cout << "4. Start the simulation" << endl;
+    cout << "5. Exit the simulation" << endl;
     for (int i = 0; i<75; i++) {
         cout << '-';
     }
@@ -330,6 +331,17 @@ int event_planner() {
         tr.traffic_lights_changer();
     }
     else if (main_choice == 3) {
+        if (pointer.min_node) {
+            int change_time, new_time;
+            cout << "Enter the time to decrease it :- ";
+            cin >> change_time;
+            cout << "Enter the new time for it :- ";
+            cin >> new_time;
+            pointer.decrease(pointer.min_node, change_time, new_time);
+        }
+        else cout << "No actions to take place!!!" << endl;
+    }
+    else if (main_choice == 4) {
         int time = 1;
         while(true) {
             cout << time << '\n';
