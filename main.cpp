@@ -228,6 +228,15 @@ public:
         found = found_ptr;
     }
 
+    void Deletion(int val){
+        if (min_node == NULL)
+            cout << "The heap is empty" << endl;
+        else {
+            Find(min_node, val, 0);
+            Extract_min(); //as 0 will be minimum
+            cout << "Key Deleted" << endl;
+        }
+    }
 };
 
 FibonacciHeap pointer;

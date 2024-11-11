@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traffic Simulation - AI Tech Theme</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.16/tailwind.min.css">
+  <style>
+    /* Basic black-and-white theme styling */
+    body {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+      font-family:'Franklin Gothic Medium'; /* Monospaced font for tech look */
+    }
+
+    h1, h2, .text-xl, .text-2xl {
+      color: #ffffff;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    /* Container and elements with tech-inspired styling */
+    .sidebar, .card, .modal, .table {
+      background-color: #2a2a2a;
+      color: #e0e0e0;
+      border: 1px solid #3d3d3d;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); /* Subtle glow effect */
+      border-radius: 8px;
+    }
+
+    .button, .slider {
+      background-color: #333;
+      color: #ffffff;
+      border: 1px solid #5a5a5a;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .button:hover, .slider:hover {
+      background-color: #5a5a5a;
+      color: #000000;
+    }
+
+    .active-page {
+      color: #00ff99; /* Highlight active page link */
+    }
+
+    /* Event Log and Table styling */
+    .event-log {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #b5b5b5;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      margin-right: 6px;
+      border-radius: 50%;
+    }
+
+    /* Special tech colors for different elements */
+    .legend-dot.green { background-color: #00ff00; }
+    .legend-dot.red { background-color: #ff0000; }
+    .legend-dot.gray { background-color: #aaaaaa; }
+
+    /* Modal styling for a high-tech feel */
+    .modal {
+      background-color: #1e1e1e;
+      border: 1px solid #4e4e4e;
+      box-shadow: 0 0 20px rgba(0, 255, 153, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <div class="flex">
+    <nav class="sidebar w-1/5 p-6">
+      <h1 class="text-xl mb-4">Traffic Simulation</h1>
+      <button onclick="showPage('dashboard')" class="w-full text-left py-2 mb-2 button">Dashboard</button>
+      <button onclick="showPage('eventViewer')" class="w-full text-left py-2 mb-2 button">Event Viewer</button>
+      <button onclick="showPage('settings')" class="w-full text-left py-2 mb-2 button">Settings</button>
+      <button onclick="showPage('eventCreation')" class="w-full text-left py-2 mb-2 button">Event Creation</button> <!-- New Event Creation Page Link -->
+    </nav>
+
+    <!-- Main Content -->
+    <div class="w-4/5 p-6">
+
+      <!-- Dashboard Section -->
+      <section id="dashboard" class="hidden card p-6">
+        <div class="text-2xl mb-4">Dashboard</div>
+        <div class="flex justify-between items-center mb-4">
+          <div>Current Simulation Time: <span id="simulationTime">00:00:00</span></div>
+          <div>
+            <button class="button p-2 rounded mr-2" onclick="setCustomTime()">Set Time</button>
+            <button class="button p-2 rounded" onclick="toggleSettingsModal()">Settings</button>
+          </div>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-lg shadow-md">
+          <div class="text-xl mb-2">Real-Time Simulation Map</div>
+          <div class="relative h-80 bg-gray-900 rounded-lg overflow-hidden">
+            <div id="legend" class="absolute top-2 right-2 bg-gray-700 p-2 rounded shadow">
+              <p class="text-gray-300">Legend:</p>
+              <div class="legend-item">
+                <div class="legend-dot green"></div>
+                <span>Green Light</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot red"></div>
+                <span>Red Light</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot gray"></div>
+                <span>Vehicle</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-800 p-4 rounded-lg shadow-md mt-4">
+          <div class="text-xl mb-2">Event Log</div>
+          <div id="eventLog" class="event-log h-40 overflow-y-auto bg-gray-900 p-2 rounded"></div>
+          <div class="flex mt-4">
+            <button onclick="startSimulation()" class="button py-2 px-4 rounded-lg mr-2">Start</button>
+            <button onclick="pauseSimulation()" class="button py-2 px-4 rounded-lg mr-2">Pause</button>
+            <button onclick="resetSimulation()" class="button py-2 px-4 rounded-lg">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Event Viewer Section -->
+      <section id="eventViewer" class="hidden card p-6">
+        <div class="text-2xl mb-4">Event Viewer</div>
+        <input type="text" placeholder="Search Events" class="border px-2 py-1 rounded-lg w-full mb-4 bg-gray-700 text-white">
+        <table class="table w-full bg-gray-800 rounded-lg shadow-md">
+          <thead>
+            <tr class="bg-gray-700 text-left">
+              <th class="p-2">Timestamp</th>
+              <th class="p-2">Event Type</th>
+              <th class="p-2">Details</th>
+              <th class="p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="eventList"></tbody>
+        </table>
+      </section>
+
+      <!-- Settings Section -->
+      <section id="settings" class="hidden card p-6">
+        <div class="text-2xl mb-4">Settings</div>
+        <label class="block mb-4">Traffic Density</label>
+        <input type="range" min="0" max="100" value="50" class="slider w-full mb-4">
+        <label class="block mb-4">Max Simulation Speed</label>
+        <input type="range" min="1" max="5" value="2" class="slider w-full mb-4">
+        <button onclick="saveSettings()" class="button py-2 px-4 rounded-lg">Save Settings</button>
+      </section>
+
+      <!-- Event Creation Section (New Page) -->
+      <section id="eventCreation" class="hidden card p-6">
+        <div class="text-2xl mb-4">Event Creation</div>
+        <label for="eventType" class="block mb-2">Event Type</label>
+        <select id="eventType" class="border p-2 rounded-lg w-full mb-4 bg-gray-800 text-white" onchange="toggleVehicleNumberInput()">
+          <option value="vehicleArrival">Vehicle Arrival</option>
+          <option value="trafficLightChange">Traffic Light Change</option>
+        </select>
+        <label for="eventTimestamp" class="block mb-2">Timestamp</label>
+        <input id="eventTimestamp" type="text" placeholder="HH:MM:SS" class="border p-2 rounded-lg w-full mb-4 bg-gray-800 text-white">
+        <label for="vehicleNumber" id="vehicleNumberLabel" class="block mb-2 hidden">Vehicle Number</label>
+        <input id="vehicleNumber" type="text" placeholder="Vehicle Number" class="border p-2 rounded-lg w-full mb-4 bg-gray-800 text-white hidden">
+        <button onclick="saveEvent()" class="button py-2 px-4 rounded-lg mr-2">Save Event</button>
+        <button onclick="clearEventForm()" class="button py-2 px-4 rounded-lg">Clear</button>
+        <label for="decreaseTime" class="block mb-2">Decrease Time (seconds)</label>
+        <input id="decreaseTime" type="number" placeholder="Seconds to Decrease" class="border p-2 rounded-lg w-full mb-4 bg-gray-800 text-white">
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    // JavaScript functions for simulation
+    let simulationInterval;
+    let simulationTime = 0;
+
+    function updateSimulationTime() {
+      simulationTime++;
+      const hours = String(Math.floor(simulationTime / 3600)).padStart(2, '0');
+      const minutes = String(Math.floor((simulationTime % 3600) / 60)).padStart(2, '0');
+      const seconds = String(simulationTime % 60).padStart(2, '0');
+      document.getElementById("simulationTime").textContent = `${hours}:${minutes}:${seconds}`;
+    }
+
+    function startSimulation() {
+      simulationInterval = setInterval(updateSimulationTime, 1000);
+    }
+
+    function pauseSimulation() {
+      clearInterval(simulationInterval);
+    }
+
+    function resetSimulation() {
+      simulationTime = 0;
+      document.getElementById("simulationTime").textContent = "00:00:00";
+    }
+
+    function saveEvent() {
+      const eventType = document.getElementById("eventType").value;
+      const eventTimestamp = document.getElementById("eventTimestamp").value;
+      const vehicleNumber = document.getElementById("vehicleNumber").value;
+      const decreaseTime = document.getElementById("decreaseTime").value;
+
+      if (eventType === "vehicleArrival" && vehicleNumber) {
+        document.getElementById("eventLog").innerHTML += `<div>${eventTimestamp} - ${eventType} - Vehicle Number: ${vehicleNumber}</div>`;
+      } else {
+        document.getElementById("eventLog").innerHTML += `<div>${eventTimestamp} - ${eventType}</div>`;
+      }
+
+      if (decreaseTime) {
+        simulationTime -= parseInt(decreaseTime);
+        updateSimulationTime();
+      }
+
+      clearEventForm();
+    }
+
+    function clearEventForm() {
+      document.getElementById("eventType").value = "";
+      document.getElementById("eventTimestamp").value = "";
+      document.getElementById("vehicleNumber").value = "";
+      document.getElementById("decreaseTime").value = "";
+      toggleVehicleNumberInput();
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll("section").forEach(section => section.classList.add("hidden"));
+      document.getElementById(pageId).classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("eventModal").classList.add("hidden");
+    }
+
+    function setCustomTime() {
+      const time = prompt("Enter time in HH:MM:SS format", "00:00:00");
+      if (time) {
+        const [hours, minutes, seconds] = time.split(":").map(Number);
+        simulationTime = hours * 3600 + minutes * 60 + seconds;
+        updateSimulationTime();
+      }
+    }
+
+    function toggleSettingsModal() {
+      document.getElementById("settings").classList.toggle("hidden");
+    }
+
+    function toggleVehicleNumberInput() {
+      const eventType = document.getElementById("eventType").value;
+      const vehicleNumberLabel = document.getElementById("vehicleNumberLabel");
+      const vehicleNumberInput = document.getElementById("vehicleNumber");
+
+      if (eventType === "vehicleArrival") {
+        vehicleNumberLabel.classList.remove("hidden");
+        vehicleNumberInput.classList.remove("hidden");
+      } else {
+        vehicleNumberLabel.classList.add("hidden");
+        vehicleNumberInput.classList.add("hidden");
+      }
+    }
+
+    // Show the Dashboard by default
+    showPage('dashboard');
+  </script>
+</body>
+</html>
